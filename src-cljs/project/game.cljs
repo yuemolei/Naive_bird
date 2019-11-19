@@ -3,7 +3,8 @@
             [reagent.session :as session]
             [domina :as dom]
             [cljs.core.async :refer [<! chan sliding-buffer put! close! timeout]]
-            [ajax.core :refer [GET POST]])
+            [ajax.core :refer [GET POST]]
+            [clojure.string :as str])
   (:require-macros
     [cljs.core.async.macros :refer [go-loop go]]))
 
@@ -38,6 +39,7 @@
                      :flappy-start-time 0
                      :flappy-y   start-y
                      :button-y 363
+                     :level 1
                      :pillar-list
                      [{ :start-time 0
                        :pos-x 900
@@ -70,13 +72,73 @@
           (+ flappy-y flappy-height))))
 (defn bottom-collision? [{:keys [flappy-y]}]
   (>= flappy-y (- bottom-y flappy-height)))
+(declare get-rank)
+(defn rank-list-component [response]
+  (fn []
+    [:div
+     [:a#btn1.btn.btn-outline-success {:onClick #(get-rank 1)
+                                    :style {:color "#FFF" :width "33%"}} "EASY"]
+     [:a#btn2.btn.btn-outline-success {:onClick #(get-rank 2)
+                                    :style {:color "#FFF" :width "33%"}} "NORMAL"]
+     [:a#btn3.btn.btn-outline-success {:onClick #(get-rank 3)
+                                    :style {:color "#FFF" :width "33%"}} "HARD"]
+     [:div {:style {:display "grid"
+                    :background-color "#aed0a6bd"
+                    :border-radius "10px"
+                    :box-shadow "7px 7px 5px 0px #00000036"}}
+      [:ul [:div.rank-item "USER NAME"]
+       [:div.rank-item "SCORE"]]
+      [:ul [:div.rank-item (nth response 0)]
+       [:div.rank-item (nth response 1)]]
+      [:ul [:div.rank-item (nth response 2)]
+       [:div.rank-item (nth response 3)]]
+      [:ul [:div.rank-item (nth response 4)]
+       [:div.rank-item (nth response 5)]]
+      [:ul [:div.rank-item (nth response 6)]
+       [:div.rank-item (nth response 7)]]
+      [:ul [:div.rank-item (nth response 8)]
+       [:div.rank-item (nth response 9)]]
+      [:ul [:div.rank-item (nth response 10)]
+       [:div.rank-item (nth response 11)]]
+      [:ul [:div.rank-item (nth response 12)]
+       [:div.rank-item (nth response 13)]]
+      [:ul [:div.rank-item (nth response 14)]
+       [:div.rank-item (nth response 15)]]
+      [:ul [:div.rank-item (nth response 16)]
+       [:div.rank-item (nth response 17)]]
+      [:ul [:div.rank-item (nth response 18)]
+       [:div.rank-item (nth response 19)]]]]))
+(defn handler-rank [response]
+  (r/render
+    (rank-list-component (str/split response #" "))
+    (dom/by-id "rank-list")))
+(defn select-btn [level]
+  (if (= level 1)
+    (do
+      (dom/add-class! (dom/by-id "btn1") "selected")
+      (dom/remove-class! (dom/by-id "btn2") "selected")
+      (dom/remove-class! (dom/by-id "btn3") "selected"))
+    (if (= level 2)
+      (do
+        (dom/remove-class! (dom/by-id "btn1") "selected")
+        (dom/add-class! (dom/by-id "btn2") "selected")
+        (dom/remove-class! (dom/by-id "btn3") "selected"))
+      (do
+        (dom/remove-class! (dom/by-id "btn1") "selected")
+        (dom/remove-class! (dom/by-id "btn2") "selected")
+        (dom/add-class! (dom/by-id "btn3") "selected")))))
+(defn get-rank [level]
+  (select-btn level)
+  (GET "/get-rank" {:params {:level level}
+                    :handler handler-rank}))
 (defn endgame [s]
   (let [form-data (doto
                     (js/FormData.)
                     (.append "user" js/identity)
                     (.append "level" (:level s))
                     (.append "score" (:score s)))]
-    (POST "/send-score" {:body form-data}))
+    (POST "/send-score" {:body form-data
+                         :handler handler-rank}))
   (assoc s :timer-running false))
 (defn collision? [{:keys [pillar-list] :as st}]
   (if (some #(or (and (in-pillar? %)
@@ -173,6 +235,7 @@
         (.requestAnimationFrame js/window time-loop)))))
 
 (defn start-game [level]
+  (dom/add-class! (dom/by-id "rank-list") "disappear")
   (if (= level 1)
     (easy-init)
     (if (= level 2)
@@ -183,7 +246,9 @@
     (fn [time]
       (reset! flap-state (reset-state @flap-state time level))
       (time-loop time))))
-(defn show-rank []
+(defn show-rank [level]
+  (select-btn level)
+  (dom/remove-class! (dom/by-id "rank-list") "disappear")
   (.requestAnimationFrame
     js/window
     (fn [time]
@@ -236,29 +301,14 @@
       [:div.scrolling-border {:style { :background-position-x (px border-pos)}}]
       [:div.namebox
        (if-not timer-running
-         (if (and (< 0 score)
+         (if (and (< 0 jump-count)
                   (= false rank))
-           [:a.button.button-3d.button-action.button-pill {:onClick #(show-rank)
+           [:a.button.button-3d.button-action.button-pill {:onClick #(show-rank level)
                                                            :style {:z-index "5"
                                                                    :color "#FFF"}} "Rank"]
            [:span])
          [:span])]]
-     [:div.rank
-      (if rank
-        [:div.ranklist
-         [:ul [:div.rankitem "USER NAME"]
-          [:div.rankitem "SCORE"]
-          [:div.rankitem "LEVEL"]]
-         [:ul [:div.rankitem js/identity]
-          [:div.rankitem score]
-          [:div.rankitem
-           (if (= 1 level)
-             "EASY")
-           (if (= 2 level)
-             "NORMAL")
-           (if (= 3 level)
-             "HARD")]]]
-        [:span])]]))
+     [:div#rank-list.rank.disappear]]))
 
 (defn ^:export init []
   (let [node (dom/by-id "board-area")]
@@ -266,4 +316,5 @@
         (r/render (main-component full-state) node)))
   (add-watch flap-state :renderer (fn [_ _ _ n]
                                     (renderer (world n))))
-  (reset! flap-state @flap-state))
+  (reset! flap-state @flap-state)
+  (get-rank 1))

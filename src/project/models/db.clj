@@ -11,11 +11,18 @@
 
 (defn save-user! [user password]
   (sql/insert! db-spec :users {:user user :password password}))
-(defn insert-score! [user level score]
-  (sql/insert! db-spec :ranklist {:user user :level level :score score}))
+(defn init-score! [user]
+  (sql/insert! db-spec :ranklist {:user user :level 1 :score 0})
+  (sql/insert! db-spec :ranklist {:user user :level 2 :score 0})
+  (sql/insert! db-spec :ranklist {:user user :level 3 :score 0}))
+(defn update-score! [user level score]
+  (sql/update! db-spec :ranklist {:score score} ["user = ? and level = ?" user level]))
 (defn select-user [user]
   (sql/query db-spec ["SELECT user FROM users WHERE user = ? " user]))
-
+(defn get-score [user level]
+  (sql/query db-spec ["SELECT score FROM ranklist WHERE user = ?" user]))
+(defn rank [level]
+  (sql/query db-spec ["SELECT `user`,`score` FROM `ranklist` where level = ? ORDER BY `ranklist`.`score` DESC" level]))
 (defn check-password [user]
   (sql/query db-spec ["SELECT password FROM users WHERE user = ?" user]))
 

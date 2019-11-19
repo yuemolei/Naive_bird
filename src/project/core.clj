@@ -13,24 +13,18 @@
             [taoensso.timbre :as log]
             [bouncer.core :as b]
             [bouncer.validators :as v]
-            [ring.middleware.session :refer [wrap-session]]))
-
-(defn reg-errors [{:keys [pass-confirm] :as params}]
-  (first
-    (b/validate
-      params
-      :user [[v/required :message "name cannot be empty"]]
-      :password [[v/required :message "password cannot be empty"]
-                 [= pass-confirm :message "two passwords should same"]])))
+            [ring.middleware.session :refer [wrap-session]]
+            [cognitect.transit :as transit]
+            [clojure.string :as str]))
 
 (defn home-handle [request]
   (parser/render-file "index.html" request))
 (defn game-handle [request]
   (parser/render-file "game.html" request))
 (defn login-page [request]
-  (parser/render-file "login.html" {}))
+  (parser/render-file "login.html" request))
 (defn register-page [request]
-  (parser/render-file "register.html" {}))
+  (parser/render-file "register.html" request))
 (defn handle-login [user password request]
   (if (hashers/check password (:password (first (db/check-password user))))
     (game-handle (assoc-in request [:session :identity] user))
@@ -50,22 +44,65 @@
       (register-page (assoc req :error "user already exist"))
       (do
         (db/save-user! user (hashers/derive password))
+        (db/init-score! user)
         (-> {:result :ok}
             (resp/ok))
         (login-page req)))
     (catch Exception e
       (do
         (log/error e)))))
-
+(defn return-rank [level]
+  (let [rank-list (db/rank level)]
+    (let [user0 (:user (nth rank-list 0))
+          score0 (:score (nth rank-list 0))
+          user1 (:user (nth rank-list 1))
+          score1 (:score (nth rank-list 1))
+          user2 (:user (nth rank-list 2))
+          score2 (:score (nth rank-list 2))
+          user3 (:user (nth rank-list 3))
+          score3 (:score (nth rank-list 3))
+          user4 (:user (nth rank-list 4))
+          score4 (:score (nth rank-list 4))
+          user5 (:user (nth rank-list 5))
+          score5 (:score (nth rank-list 5))
+          user6 (:user (nth rank-list 6))
+          score6 (:score (nth rank-list 6))
+          user7 (:user (nth rank-list 7))
+          score7 (:score (nth rank-list 7))
+          user8 (:user (nth rank-list 8))
+          score8 (:score (nth rank-list 8))
+          user9 (:user (nth rank-list 9))
+          score9 (:score (nth rank-list 9))]
+      (parser/render "{{user0}} {{score0}} {{user1}} {{score1}} {{user2}} {{score2}} {{user3}} {{score3}} {{user4}} {{score4}} {{user5}} {{score5}} {{user6}} {{score6}} {{user7}} {{score7}} {{user8}} {{score8}} {{user9}} {{score9}} {{level}}"
+                     {:user0 user0 :score0 score0
+                      :user1 user1 :score1 score1
+                      :user2 user2 :score2 score2
+                      :user3 user3 :score3 score3
+                      :user4 user4 :score4 score4
+                      :user5 user5 :score5 score5
+                      :user6 user6 :score6 score6
+                      :user7 user7 :score7 score7
+                      :user8 user8 :score8 score8
+                      :user9 user9 :score9 score9 :level level}))))
 (defn handle-score [user level score req]
   (try
-    (db/insert-score! user level score)
+    (if (< (:score (first (db/get-score user level))) (Integer. score))
+      (db/update-score! user level score))
     (-> {:result :ok}
         (resp/ok))
-    (parser/render "Hello {{name}}!" {:name "Yogthos"})
+    (return-rank level)
     (catch Exception e
       (do
-        (log/error e)))))
+        (parser/render "Sorry {{name}}!" {:name "Yogthos"})))))
+
+(defn handle-rank [level req]
+  (try
+    (-> {:result :ok}
+        (resp/ok))
+    (return-rank level)
+    (catch Exception e
+      (do
+        (parser/render "Sorry {{name}}!" {:name "Yogthos"})))))
 
 (defn wrap-nocache [handler]
   (fn [request]
@@ -85,6 +122,7 @@
     (POST "/register" [user password :as req]
       (register! req user password (:user req)))
     (POST "/send-score" [user level score :as req] (handle-score user level score req))
+    (GET "/get-rank" [level :as req] (handle-rank level req))
     (route/not-found error-page)))
 (def app
   (-> app-routes
