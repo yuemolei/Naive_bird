@@ -50,7 +50,9 @@
     [:div.container {:id "board-area"}
      [:form#loginForm.form-signin
       {:action "/register" :method "post"}
-      [:h1.h3.mb-3.font-weight-normal.text-center "Register"]
+      (if (= js/error "user already exist")
+        [:h1.h3.mb-3.font-weight-normal.text-center "user already exist"]
+        [:h1.h3.mb-3.font-weight-normal.text-center "Register"])
       [:div
        [:label.sr-only "user" "user"]
        [:input#user.form-control

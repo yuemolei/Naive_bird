@@ -23,14 +23,16 @@
                     (validate-passoword (dom/value password)))
              true
              (do
-               (js/alert "name or password wrong")
+               (js/alert "name or password cannot be empty")
                false))))
 
 (defn login-component []
       [:div {:id "board-area"}
        [:form#loginForm.form-signin
         {:action "/login" :method "post"}
-        [:h1.h3.mb-3.font-weight-normal.text-center "Please sign in"]
+        (if (= js/error "user or password wrong")
+          [:h1.h3.mb-3.font-weight-normal.text-center "name or password wrong"]
+          [:h1.h3.mb-3.font-weight-normal.text-center "Please sign in"])
         [:div
          [:label.sr-only "user" "user"]
          [:input#user.form-control

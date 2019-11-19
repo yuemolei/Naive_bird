@@ -1,7 +1,21 @@
 /*rgb(84,56,71)*/
-.rankitem{
+#btn1:hover,#btn2:hover,#btn3:hover{
+    box-shadow: 7px 7px 3px 0px rgba(0, 0, 0, 0.21);
+}
+.selected{
+    background-color: #aed0a6bd;
+}
+ul{
+    padding-inline-start: 0;
+    margin-block-end: 7px;
+    margin-block-start: 0;
+}
+.disappear{
+    visibility:hidden;
+}
+.rank-item{
     float: left;
-    width: 33%;
+    width: 50%;
 }
 .title{
     font-size: 50px;
@@ -31,10 +45,9 @@
 .rank{
     position: absolute;
     top: 50px;
-    background-color: gray;
     left: 40px;
 }
-.ranklist{
+#rank-list{
     width:400px;
     height:400px;
 }

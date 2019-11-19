@@ -29,7 +29,9 @@
                  [bouncer "1.0.1"]
                  [org.clojure/core.async "0.3.442"]
                  [mysql/mysql-connector-java "8.0.18"]
-                 [cljs-ajax "0.8.0"]]
+                 [cljs-ajax "0.8.0"]
+                 [com.cognitect/transit-cljs "0.8.256"]
+                 [org.clojure/data.json "0.2.7"]]
   :main ^:skip-aot project.core
   :plugins [[lein-ring "0.12.5"]
             [lein-cljsbuild "1.1.7" :excludes [[org.clojure/clojure]]]
