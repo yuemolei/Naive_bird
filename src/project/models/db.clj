@@ -2,7 +2,7 @@
   (:require [clojure.java.jdbc :as sql]))
 
 (def db-spec {:subprotocol "mysql"
-              :subname "//localhost:3306/csci6221?serverTimezone=UTC"
+              :subname "//34.74.9.108/cs6221?serverTimezone=UTC"
               :user "root"
               :password "root"})
 
