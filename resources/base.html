@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=0.67, maximum-scale=0.67, shrink-to-fit=no">
+        <title>{% block page-title %}{% endblock %}</title>
+        <!-- styles -->
+        {% style "/assets/bootstrap/css/bootstrap.min.css" %}
+        {% style "/assets/font-awesome/css/all.css" %}
+        <link rel="stylesheet" href="/css/site.css">
+        <link rel="stylesheet" href="/css/buttons.css">
+        <link href="https://fonts.googleapis.com/css?family=Tomorrow:400,800&display=swap" rel="stylesheet">
+        {% block page-css %}
+        {% endblock %}
+    </head>
+    <body style="font-family: 'Tomorrow', sans-serif;">
+        <div class="container text-center">
+            <div id="board-area">
+                {% block content %}
+                {% endblock %}
+            </div>
+        </div>
+        <!-- scripts -->
+        {% script "/assets/jquery/jquery.min.js" %}
+        {% script "/assets/font-awesome/js/all.js" %}
+        {% script "/assets/bootstrap/js/bootstrap.min.js" %}
+        <script src="/js/main.js" type="text/javascript"></script>
+        <script type="text/javascript">
+            var identity = "{{ session.identity }}";
+        </script>
+        {% block page-script %}
+
+        {% endblock %}
+    </body>
+</html>

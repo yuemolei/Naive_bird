@@ -1,0 +1,14 @@
+.form-signin{
+    padding-top: 100px;
+    margin: auto;
+    width: 250px;
+}
+.form-control{
+    margin-top: 5px;
+}
+.check-box{
+    margin-top: 5px;
+}
+#submit{
+    margin-top:5px;
+}
