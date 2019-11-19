@@ -108,17 +108,19 @@
        [:div.rank-item (nth response 17)]]
       [:ul [:div.rank-item (nth response 18)]
        [:div.rank-item (nth response 19)]]]]))
+(declare select-btn)
 (defn handler-rank [response]
   (r/render
     (rank-list-component (str/split response #" "))
-    (dom/by-id "rank-list")))
+    (dom/by-id "rank-list"))
+  (select-btn (nth (str/split response #" ") 20)))
 (defn select-btn [level]
-  (if (= level 1)
+  (if (= level "1")
     (do
       (dom/add-class! (dom/by-id "btn1") "selected")
       (dom/remove-class! (dom/by-id "btn2") "selected")
       (dom/remove-class! (dom/by-id "btn3") "selected"))
-    (if (= level 2)
+    (if (= level "2")
       (do
         (dom/remove-class! (dom/by-id "btn1") "selected")
         (dom/add-class! (dom/by-id "btn2") "selected")
@@ -128,17 +130,18 @@
         (dom/remove-class! (dom/by-id "btn2") "selected")
         (dom/add-class! (dom/by-id "btn3") "selected")))))
 (defn get-rank [level]
-  (select-btn level)
   (GET "/get-rank" {:params {:level level}
                     :handler handler-rank}))
-(defn endgame [s]
+(defn post-score [st]
   (let [form-data (doto
                     (js/FormData.)
                     (.append "user" js/identity)
-                    (.append "level" (:level s))
-                    (.append "score" (:score s)))]
+                    (.append "level" (:level st))
+                    (.append "score" (:score st)))]
     (POST "/send-score" {:body form-data
-                         :handler handler-rank}))
+                         :handler handler-rank})))
+(defn endgame [s]
+  (post-score s)
   (assoc s :timer-running false))
 (defn collision? [{:keys [pillar-list] :as st}]
   (if (some #(or (and (in-pillar? %)
@@ -234,8 +237,17 @@
         (<! (timeout 30))
         (.requestAnimationFrame js/window time-loop)))))
 
+(defn score-loop [time]
+  (let [new-state (swap! flap-state (partial time-update time))]
+    (when (:timer-running new-state)
+      (go
+        (post-score new-state)
+        (<! (timeout 2000))
+        (.requestAnimationFrame js/window score-loop)))))
+
 (defn start-game [level]
   (dom/add-class! (dom/by-id "rank-list") "disappear")
+  (get-rank level)
   (if (= level 1)
     (easy-init)
     (if (= level 2)
@@ -245,9 +257,9 @@
     js/window
     (fn [time]
       (reset! flap-state (reset-state @flap-state time level))
-      (time-loop time))))
+      (time-loop time)
+      (score-loop time))))
 (defn show-rank [level]
-  (select-btn level)
   (dom/remove-class! (dom/by-id "rank-list") "disappear")
   (.requestAnimationFrame
     js/window

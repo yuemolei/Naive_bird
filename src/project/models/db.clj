@@ -18,9 +18,9 @@
 (defn update-score! [user level score]
   (sql/update! db-spec :ranklist {:score score} ["user = ? and level = ?" user level]))
 (defn select-user [user]
-  (sql/query db-spec ["SELECT user FROM users WHERE user = ? " user]))
+  (sql/query db-spec ["SELECT user FROM users WHERE user = ?" user]))
 (defn get-score [user level]
-  (sql/query db-spec ["SELECT score FROM ranklist WHERE user = ?" user]))
+  (sql/query db-spec ["SELECT score FROM ranklist WHERE user = ? AND level = ?" user level]))
 (defn rank [level]
   (sql/query db-spec ["SELECT `user`,`score` FROM `ranklist` where level = ? ORDER BY `ranklist`.`score` DESC" level]))
 (defn check-password [user]

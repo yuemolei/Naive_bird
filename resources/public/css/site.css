@@ -11,7 +11,7 @@ ul{
     margin-block-start: 0;
 }
 .disappear{
-    visibility:hidden;
+    left: 500px !important;
 }
 .rank-item{
     float: left;

@@ -26,9 +26,13 @@
 (defn register-page [request]
   (parser/render-file "register.html" request))
 (defn handle-login [user password request]
-  (if (hashers/check password (:password (first (db/check-password user))))
-    (game-handle (assoc-in request [:session :identity] user))
-    (login-page (assoc request :error "user or password wrong"))))
+  (try
+    (if (hashers/check password (:password (first (db/check-password user))))
+      (game-handle (assoc-in request [:session :identity] user))
+      (login-page (assoc request :error "user or password wrong")))
+    (catch Exception e
+      (do
+        (login-page (assoc request :error "user or password wrong"))))))
 (defn handle-logout [request]
   (do
     (assoc request :session {})
