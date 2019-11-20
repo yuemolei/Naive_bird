@@ -22,7 +22,6 @@
           transition-property: all;
   -webkit-transition-duration: .3s;
           transition-duration: .3s;
-
   .button:visited {
     color: #666; }
   .button:hover, .button:focus {
@@ -50,7 +49,7 @@
     -webkit-box-shadow: none !important;
             box-shadow: none !important;
     opacity: .8 !important; }
-
+}
 .button-action,
 .button-action-flat {
   background-color: #A5DE37;
