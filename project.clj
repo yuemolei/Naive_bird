@@ -46,7 +46,7 @@
   :cljsbuild
   {:builds {:dev
             {:source-paths ["src-cljs"]
-             :figwheel     true
+             :figwheel     false
              :compiler     {:main                 project.core
                             :asset-path           "js/out"
                             :output-to            "resources/public/js/main.js"

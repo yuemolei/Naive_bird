@@ -13,7 +13,7 @@
   (floor (+ start-pos (* time vel))))
 (def horiz-vel -0.15)
 (def gravity (atom 0.05))
-(def jump-vel 21)
+(def jump-vel 18)
 (def start-y 312)
 (def bottom-y 561)
 (def flappy-x 212)
@@ -22,6 +22,7 @@
 (def pillar-spacing 324)
 (def pillar-gap (atom 158)) ;; 158
 (def pillar-width 86)
+(def current-score (atom 0))
 (defn easy-init []
   (reset! gravity 0.05)
   (reset! pillar-gap 300))
@@ -234,18 +235,24 @@
   (let [new-state (swap! flap-state (partial time-update time))]
     (when (:timer-running new-state)
       (go
-        (<! (timeout 30))
+        (<! (timeout 16))
+        (if-not (compare-and-set! current-score (:score new-state) (:score new-state))
+          (do
+            (post-score new-state)
+            (reset! current-score (:score new-state))))
         (.requestAnimationFrame js/window time-loop)))))
 
 (defn score-loop [time]
-  (let [new-state (swap! flap-state (partial time-update time))]
-    (when (:timer-running new-state)
-      (go
-        (post-score new-state)
-        (<! (timeout 2000))
-        (.requestAnimationFrame js/window score-loop)))))
+  (if (:timer-running flap-state)
+    (let [new-state (swap! flap-state (partial time-update time))]
+      (when (:timer-running new-state)
+        (go
+          (post-score new-state)
+          (<! (timeout 2000))
+          (.requestAnimationFrame js/window score-loop))))))
 
 (defn start-game [level]
+  (reset! current-score 0)
   (dom/add-class! (dom/by-id "rank-list") "disappear")
   (get-rank level)
   (if (= level 1)
@@ -257,8 +264,7 @@
     js/window
     (fn [time]
       (reset! flap-state (reset-state @flap-state time level))
-      (time-loop time)
-      (score-loop time))))
+      (time-loop time))))
 (defn show-rank [level]
   (dom/remove-class! (dom/by-id "rank-list") "disappear")
   (.requestAnimationFrame
@@ -313,7 +319,7 @@
       [:div.scrolling-border {:style { :background-position-x (px border-pos)}}]
       [:div.namebox
        (if-not timer-running
-         (if (and (< 0 jump-count)
+         (if (and (< 0 score)
                   (= false rank))
            [:a.button.button-3d.button-action.button-pill {:onClick #(show-rank level)
                                                            :style {:z-index "5"

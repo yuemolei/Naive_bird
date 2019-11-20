@@ -1,4 +1,21 @@
 /*rgb(84,56,71)*/
+
+@media screen and (max-width: 900px){
+    .disappear{
+        visibility: hidden !important;
+    }
+}
+
+@media screen and (min-width: 900px){
+    #board-area{
+        margin:0 !important;
+    }
+}
+
+html,body{
+    overflow: hidden;
+    height: 100%;
+}
 #btn1:hover,#btn2:hover,#btn3:hover{
     box-shadow: 7px 7px 3px 0px rgba(0, 0, 0, 0.21);
 }

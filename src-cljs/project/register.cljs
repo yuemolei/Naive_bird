@@ -56,7 +56,7 @@
       [:div
        [:label.sr-only "user" "user"]
        [:input#user.form-control
-        {:type "text" :name "user" :auto-focus true :placeholder "Name"
+        {:type "text" :name "user" :autoComplete "off" :auto-focus true :placeholder "Name"
          :on-blur #(validate-invalid (dom/by-id "user") validate-user "0")}]
        [:div.invalid-feedback {:style {:position "absolute"
                                        :width "250px"}} "invalid name"]]
