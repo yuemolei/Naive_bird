@@ -6,6 +6,7 @@ A Clojure game. Naive Bird.
 
 Open the website http://35.245.163.14:3000/ and you can play this game.
 
+## Re-do
 
 If you want to run this project in your own computer, you need to install "clojure" "leiningen". 
 
