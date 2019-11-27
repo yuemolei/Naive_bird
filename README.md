@@ -4,19 +4,12 @@ A Clojure game. Naive Bird.
 
 ## Usage
 
-Just have fun.
+Open the website http://35.245.163.14:3000/ and you can play this game.
 
-## License
-
-Copyright © 2019
-
-This program and the accompanying materials are made available under the
-terms of the Eclipse Public License 2.0 which is available at
-http://www.eclipse.org/legal/epl-2.0.
-
-This Source Code may also be made available under the following Secondary
-Licenses when the conditions for such availability set forth in the Eclipse
-Public License, v. 2.0 are satisfied: GNU General Public License as published by
-the Free Software Foundation, either version 2 of the License, or (at your
-option) any later version, with the GNU Classpath Exception which is available
-at https://www.gnu.org/software/classpath/license.html.
+If you want to run this project in your own computer, you need to install "clojure" "leiningen". 
+Also, you need to create a database (mysql) which have two tables.
+First is "users" table, which include "user" "password".
+Second is "ranklist" table, which include "user" "score" "level".
+The database info should be updated in "/src/project/models/db.clj" line 4 to line 7.
+Then you can run this project by using "lein ring server-headless" "lein figwheel" in terminal.
+Open the page http://"your-IP":3000/ and you can play this game.
